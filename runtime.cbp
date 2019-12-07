@@ -31,10 +31,12 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-std=c++17" />
 			<Add directory="../windex/include" />
 		</Compiler>
 		<Linker>
 			<Add library="gdi32" />
+			<Add library="stdc++fs" />
 		</Linker>
 		<Unit filename="src/main.cpp" />
 		<Extensions>

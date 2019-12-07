@@ -1,5 +1,9 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
+#include <filesystem>
+#include <iomanip>
+
 #include "wex.h"
 
 using namespace std;
@@ -13,7 +17,8 @@ int Parse( const std::string& fname )
 {
     int total = 0;
     ifstream f( fname );
-    if( ! f.is_open() ) {
+    if( ! f.is_open() )
+    {
         cout << "cannot open " << fname << "\n";
         return total;
     }
@@ -39,6 +44,7 @@ int Parse( const std::string& fname )
 
 int main()
 {
+    int totalsecs = 0;
     // construct top level window
     gui& form = wex::maker::make();
     form.move({ 50,50,800,600});
@@ -46,7 +52,7 @@ int main()
 
     // widget for receiving dropped files
     drop& dropper = wex::maker::make<wex::drop>( form );
-    dropper.move( 10,10,790,590 );
+    dropper.move( 10,50,790,590 );
     label& instructions = wex::maker::make<wex::label>( dropper );
     instructions.move(30,30,780,580);
     instructions.text("Drop files here");
@@ -55,20 +61,34 @@ int main()
     dropper.events().drop( [&](const std::vector<std::string>& files )
     {
         // display list of dropped files
-        std::string msg;
-        msg = "Files dropped:\n";
+        std::stringstream msg;
+        msg << "Files dropped:\n";
         for( auto& f : files )
-            msg += f + "\n";
+        {
+            std::filesystem::path p( f );
+            msg << p.filename().string() << "\n";
+        }
 
         // calculate total elapsed time in all files
-        int total = 0;
+
         for( auto& f : files )
-            total += Parse( f );
-        msg += "total " + std::to_string( total ) + " secs\n";
+            totalsecs += Parse( f );
+        msg << "\ntotal " <<  std::fixed << std::setprecision(2) << totalsecs/60.0f  << " mins\n";
+        msg << "in " << std::to_string( files.size() ) << " logfiles\n";
 
         // display results
-        instructions.text( msg );
+        instructions.text( msg.str() );
         instructions.update();
+    });
+
+    button& reset = maker::make<button>( dropper );
+    reset.move( 50,0,50,30 );
+    reset.text("RESET");
+    reset.events().click([&]
+    {
+        totalsecs = 0;
+        instructions.text("Drop files here");
+        form.update();
     });
 
     form.show();
