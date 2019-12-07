@@ -70,6 +70,7 @@ int main()
         }
 
         // calculate total elapsed time in all files
+        // dropped since startup or the last click of reset button
 
         for( auto& f : files )
             totalsecs += Parse( f );
