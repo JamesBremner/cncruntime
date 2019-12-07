@@ -5,6 +5,10 @@
 using namespace std;
 using namespace wex;
 
+/** Extract total elaspsed time from log file
+    @param[in] fname path to log file
+    @return total seconds in recorded alpased time
+*/
 int Parse( const std::string& fname )
 {
     int total = 0;
@@ -13,13 +17,18 @@ int Parse( const std::string& fname )
         cout << "cannot open " << fname << "\n";
         return total;
     }
+
+    // extract lines from file
     string line;
     while( getline(f, line) )
     {
+        // find any elapsed time in line
         int p = line.find("Elapsed: ");
         if( p == -1 )
             continue;
         cout << line << "\n";
+
+        // add to total
         total += atoi( line.substr(p+9).c_str()) * 60 * 60;
         total += atoi( line.substr(p+12).c_str()) * 60;
         total += atoi( line.substr(p+15).c_str());
@@ -50,10 +59,14 @@ int main()
         msg = "Files dropped:\n";
         for( auto& f : files )
             msg += f + "\n";
+
+        // calculate total elapsed time in all files
         int total = 0;
         for( auto& f : files )
             total += Parse( f );
         msg += "total " + std::to_string( total ) + " secs\n";
+
+        // display results
         instructions.text( msg );
         instructions.update();
     });
